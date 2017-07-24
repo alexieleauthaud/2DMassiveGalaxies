@@ -1,4 +1,4 @@
 *.fits
 *.txt
 
-/.ipynb_checkpoints
+.ipynb_checkpoints/
