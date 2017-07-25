@@ -1,4 +1,8 @@
 *.fits
 *.txt
+*.jpeg
 
+decals_dr3_g09_short.fits
+hsc_s16a_fastlane_g09_short_full.fits
 
+outputs/*.fits
