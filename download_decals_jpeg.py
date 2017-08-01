@@ -11,36 +11,66 @@ from astropy.table import Table
 DECALS_API = "http://legacysurvey.org/viewer/jpeg-cutout/?"
 
 
-def getDecalsCutout(ra, dec, name=None, zoom=13):
+def getDecalsCutout(ra, dec, name=None, zoom=13, montage=True):
     """
     Get DECaLS cutout JPEG images.
     """
 
     if name is None:
-        name = "decals_ra-%s_dec-%sf" % (('%8.4f' % ra).strip(),
-                                         ('%8.4f' % dec).strip())
+        name = "decals_ra-%s_dec-%s" % (('%8.4f' % float(ra)).strip(),
+                                        ('%8.4f' % float(dec)).strip())
 
     # Organize the URL of the JPEG file
     raStr = ("%10.5f" % ra).strip()
     decStr = ("%10.5f" % dec).strip()
     zoomStr = ("%2d" % zoom).strip()
 
-    decalsStr = "ra=%s&dec=%s&zoom=%s&layer=decals-dr3" % (raStr,
-                                                           decStr,
-                                                           zoomStr)
+    # Url for the 3-color image
+    decalsImgStr = "ra=%s&dec=%s&zoom=%s&layer=decals-dr3" % (raStr,
+                                                              decStr,
+                                                              zoomStr)
+
+    # URL for the Tractor model
+    decalsModStr = "ra=%s&dec=%s&zoom=%s&layer=decals-dr3-model" % (raStr,
+                                                                    decStr,
+                                                                    zoomStr)
+
+    # URL for the Tractor residual
+    decalsResStr = "ra=%s&dec=%s&zoom=%s&layer=decals-dr3-resid" % (raStr,
+                                                                    decStr,
+                                                                    zoomStr)
 
     try:
         # URL of the JPG file
-        jpgUrl = DECALS_API + decalsStr
+        imgUrl = DECALS_API + decalsImgStr
+        modUrl = DECALS_API + decalsModStr
+        resUrl = DECALS_API + decalsResStr
 
         # Name of the JPG file
-        jpgName = '%s.jpg' % name
+        imgName = '%s_img.jpg' % name
+        modName = '%s_mod.jpg' % name
+        resName = '%s_res.jpg' % name
 
         # Download the JPG file using wget
-        jpgCommand = 'wget "' + jpgUrl + '" -O ' + jpgName
-        os.system(jpgCommand)
+        imgCommand = 'wget "' + imgUrl + '" -O ' + imgName
+        os.system(imgCommand)
 
-    except KeyError:
+        modCommand = 'wget "' + modUrl + '" -O ' + modName
+        os.system(modCommand)
+
+        resCommand = 'wget "' + resUrl + '" -O ' + resName
+        os.system(resCommand)
+
+        if montage:
+            montageCommand = 'montage %s*.jpg %s_compare.jpg' % (name, name)
+            os.system(montageCommand)
+            os.system("rm imgName")
+            os.system("rm modName")
+            os.system("rm resName")
+
+    except Exception:
+        print("!!!! Warning !!!! ")
+        print("Can not download image for %s" % name)
         pass
 
 
